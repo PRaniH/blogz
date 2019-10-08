@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+<!----First, set up the blog so that the "add a new post" form and the blog listings are on the same page, as 
+# with Get It Done!, and then separate those portions into separate routes, handler classes, and templates. 
+# For the moment, when a user submits a new post, redirect them to the main blog page.-->
+
+{% block content %}
+    <h1>Build a Blog</h1>
+    <form method='post'>
+        <label>
+            New Blog:
+            <input type="text" name='blog' />
+        </label>
+        <input type="submit" value='Add Blog' />
+    </form>
+
+    <hr />
+
+    {% if blogs|length == 0 %}
+    <p>No blogs yet</p>
+    {% else %}
+
+        <ul>
+            {% for blog in blogs %}
+            <li>{{blog.name}}
+                <form method="POST" action="/delete-blog" style="display:inline-block;">
+                    <input type="hidden" name="blog-id" value="{{blog.id}}" />
+                    <input type="submit" value="Done!" /> <!--Modify appropriately, shouldn't say done really-->>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+
+    {% endif %}
+
+    <hr />
+
+    <h2>Blogs</h2>
+
+    <ul>
+        {% for blog in blogs %}
+        <li>{{blog.name}}</li>
+        {% endfor %}
+    </ul>
+
+{% endblock %}
