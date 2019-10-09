@@ -4,7 +4,8 @@
 # For the moment, when a user submits a new post, redirect them to the main blog page.-->
 
 {% block content %}
-    <h1>Build a Blog</h1>
+
+    <h1>Add a New Blog Entry</h1>
     <form method='post'>
         <label>
             Title for your new blog:
@@ -20,33 +21,3 @@
         <p>
         <input type="submit" value='Add Entry' />
     </form>
-
-    <hr />
-
-    {% if blogs|length == 0 %}
-    <p>No blogs yet</p>
-    {% else %}
-
-        <ul>
-            {% for blog in blogs %}
-            <li>{{blog.name}}
-                <form method="POST" action="/delete-blog" style="display:inline-block;">
-                    <input type="hidden" name="blog-id" value="{{blog.id}}" />
-                    <!--input type="submit" value="Done!" /> <!--Modify appropriately, shouldn't say done really-->>
-                </form>
-            </li>
-            {% endfor %}
-        </ul>
-
-    {% endif %}
-
-    <hr />
-    
-    <ul>
-        {% for blog in blogs %}
-        <h2>{{blog.title}}</h2>
-        {{blog.body}}
-        {% endfor %}
-    </ul>
-
-{% endblock %}

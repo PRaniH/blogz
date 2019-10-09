@@ -8,9 +8,16 @@ app.config['SQLALCHEMY_ECHO'] = True
 
 db = SQLAlchemy(app)
 
+# ...displays blog posts on a main page and allows users to add new blog posts on a form page. After submitting a 
+# new blog entry on the form page, the user is redirected to a page that displays only that blog (rather than 
+# returning to the form page or to the main page). Each blog post has a title and a body. 
+
+
 # First, set up the blog so that the "add a new post" form and the blog listings are on the same page, as 
 # with Get It Done!, and then separate those portions into separate routes, handler classes, and templates. 
 # For the moment, when a user submits a new post, redirect them to the main blog page.
+
+# Make sure you can say the following about your app:
 
 #The /blog route displays all the blog posts.
 
@@ -36,9 +43,10 @@ class Blog(db.Model):
     body = db.Column(db.String(1200))#Is this long enough?
     #completed = db.Column(db.Boolean)
 
-    def __init__(self, title):
-        self.title = name
-        self.completed = False #Is this needed?
+    def __init__(self, title, body):
+        self.title = title
+        self.body = body
+        #Not using this field self.completed = False #Is this needed?
 
 
 @app.route('/', methods=['POST', 'GET'])
@@ -53,12 +61,15 @@ def index():
         db.session.add(new_blog)
         db.session.commit()
 
-    blogs = Blog.query.all() #Modified since there is no completed field - Blog.query.filter_by(completed=False).all()
+    blogs = Blog.query.all() 
+    #Modified since there is no completed field - Blog.query.filter_by(completed=False).all()
     #Not using this field with blogs completed_blogs = Blog.query.filter_by(completed=True).all()
+    
     return render_template('blog.html',title="Build a Blog", 
         blogs=blogs) #Not using with blogs completed_blogs=completed_blogs)
 
 
+#Modify this to be the new post
 @app.route('/delete-blog', methods=['POST'])
 def delete_blog():
 
