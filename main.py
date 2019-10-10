@@ -65,8 +65,7 @@ def index():
     #Modified since there is no completed field - Blog.query.filter_by(completed=False).all()
     #Not using this field with blogs completed_blogs = Blog.query.filter_by(completed=True).all()
     
-    return render_template('blog.html',title="Build a Blog", 
-        blogs=blogs) #Not using with blogs completed_blogs=completed_blogs)
+    return render_template('blog.html', title="Build a Blog", blogs=blogs) #Not using with blogs completed_blogs=completed_blogs)
 
 
 #Modify this to be the new post
