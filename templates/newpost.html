@@ -1,9 +1,7 @@
 {% extends "base.html" %}
-<!----First, set up the blog so that the "add a new post" form and the blog listings are on the same page, as 
-# with Get It Done!, and then separate those portions into separate routes, handler classes, and templates. 
-# For the moment, when a user submits a new post, redirect them to the main blog page.-->
 
 {% block content %}
+<!--When a user submits a new post, redirect them to the main blog page.-->
     <form action = "/" method='POST'>
         <label>
             Title for your new blog:
@@ -15,7 +13,7 @@
         <label>
             Your new blog:
             <p>
-            <textarea name="blog_body"></textarea> <!--Modify to make bigger in size-->
+            <textarea rows = "10" cols = "50" name="blog_body"></textarea> <!--Modify to make bigger in size-->
             <span class="error">{{body_error}}</span>
         </label>
         <p>

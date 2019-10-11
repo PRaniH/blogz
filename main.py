@@ -13,11 +13,6 @@ db = SQLAlchemy(app)
 # new blog entry on the form page, the user is redirected to a page that displays only that blog (rather than 
 # returning to the form page or to the main page). Each blog post has a title and a body. 
 
-
-# First, set up the blog so that the "add a new post" form and the blog listings are on the same page, as 
-# with Get It Done!, and then separate those portions into separate routes, handler classes, and templates. 
-# For the moment, when a user submits a new post, redirect them to the main blog page.
-
 # Make sure you can say the following about your app:
 
 #The /blog route displays all the blog posts.
@@ -35,41 +30,18 @@ db = SQLAlchemy(app)
 
 
 
-
-# Blog class with the necessary properties (i.e., an id, title, and body
+# Blog class with the necessary properties (i.e., an id, title, and body)
 class Blog(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120))
-    body = db.Column(db.String(1200))#Is this long enough?
-    #completed = db.Column(db.Boolean)
+    body = db.Column(db.String(5000))
 
     def __init__(self, title, body):
         self.title = title
         self.body = body
-        #Not using this field self.completed = False #Is this needed?
 
 
-#@app.route('/blog', methods=['POST', 'GET'])
-#def blog(): #def index():
-
-#    if request.method == 'POST':
-#        blog_title = request.form['blog_title']
-#        blog_body = request.form['blog_body']
-#        new_blog = Blog(blog_title, blog_body)
-
-
-#        db.session.add(new_blog)
-#        db.session.commit()
-
-#    blogs = Blog.query.all() 
-    #Modified since there is no completed field - Blog.query.filter_by(completed=False).all()
-    #Not using this field with blogs completed_blogs = Blog.query.filter_by(completed=True).all()
-    
-#    return render_template('blog.html', title="Build a Blog", blogs=blogs) #Not using with blogs completed_blogs=completed_blogs)
-
-
-#Modify this to be the new post
 @app.route('/newpost', methods=['POST', 'GET'])
 def new_post():
 
@@ -89,25 +61,15 @@ def new_post():
 
     return render_template('newpost.html', title='Add a New Blog Entry') #redirect('/')
 
-#Pasted this here
+
 @app.route('/blog', methods=['POST', 'GET'])
 def index():
 
-#    if request.method == 'POST':
-#        blog_title = request.form['blog_title']
-#        blog_body = request.form['blog_body']
-#        new_blog = Blog(blog_title, blog_body)
-
-
-    #    db.session.add(new_blog)
-    #    db.session.commit()
-
     blogs = Blog.query.all() 
-    #Modified since there is no completed field - Blog.query.filter_by(completed=False).all()
-    #Not using this field with blogs completed_blogs = Blog.query.filter_by(completed=True).all()
     
-    return render_template('blog.html', title="Build a Blog", blogs=blogs) #Not using with blogs completed_blogs=completed_blogs)
+    return render_template('blog.html', title="Build a Blog", blogs=blogs)
 
+#Could the below be combined with /blog route?
 @app.route('/', methods=['POST', 'GET'])
 def blog():
     title_error=""
@@ -127,7 +89,6 @@ def blog():
             new_blog = Blog(blog_title, blog_body)
             db.session.add(new_blog)
             db.session.commit()
-
 
     blogs = Blog.query.all()
 
