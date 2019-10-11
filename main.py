@@ -1,5 +1,6 @@
 from flask import Flask, request, redirect, render_template
-from flask_sqlalchemy import SQLAlchemy #Ist this needed?
+from flask_sqlalchemy import SQLAlchemy
+import cgi, re
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
@@ -49,17 +50,57 @@ class Blog(db.Model):
         #Not using this field self.completed = False #Is this needed?
 
 
-@app.route('/', methods=['POST', 'GET'])
-def index():
+#@app.route('/blog', methods=['POST', 'GET'])
+#def blog(): #def index():
 
+#    if request.method == 'POST':
+#        blog_title = request.form['blog_title']
+#        blog_body = request.form['blog_body']
+#        new_blog = Blog(blog_title, blog_body)
+
+
+#        db.session.add(new_blog)
+#        db.session.commit()
+
+#    blogs = Blog.query.all() 
+    #Modified since there is no completed field - Blog.query.filter_by(completed=False).all()
+    #Not using this field with blogs completed_blogs = Blog.query.filter_by(completed=True).all()
+    
+#    return render_template('blog.html', title="Build a Blog", blogs=blogs) #Not using with blogs completed_blogs=completed_blogs)
+
+
+#Modify this to be the new post
+@app.route('/newpost', methods=['POST', 'GET'])
+def new_post():
+
+    #blog_id = int(request.form['blog-id'])
+    #blog = Blog.query.get(blog_id)
+    #Not using with blogs blog.completed = True
+    
     if request.method == 'POST':
+
         blog_title = request.form['blog_title']
         blog_body = request.form['blog_body']
         new_blog = Blog(blog_title, blog_body)
 
-
+    
         db.session.add(new_blog)
         db.session.commit()
+
+    return render_template('newpost.html', title='Add a New Blog Entry') #redirect('/')
+
+#Pasted this here
+@app.route('/blog', methods=['POST', 'GET'])
+def index():
+
+#    if request.method == 'POST':
+#        blog_title = request.form['blog_title']
+#        blog_body = request.form['blog_body']
+#        new_blog = Blog(blog_title, blog_body)
+
+
+    #    db.session.add(new_blog)
+    #    db.session.commit()
 
     blogs = Blog.query.all() 
     #Modified since there is no completed field - Blog.query.filter_by(completed=False).all()
@@ -67,18 +108,33 @@ def index():
     
     return render_template('blog.html', title="Build a Blog", blogs=blogs) #Not using with blogs completed_blogs=completed_blogs)
 
+@app.route('/', methods=['POST', 'GET'])
+def blog():
+    title_error=""
+    body_error=""
 
-#Modify this to be the new post
-@app.route('/delete-blog', methods=['POST'])
-def delete_blog():
+    if request.method == 'POST':
+        blog_title = request.form['blog_title']
+        blog_body = request.form['blog_body']
 
-    blog_id = int(request.form['blog-id'])
-    blog = Blog.query.get(blog_id)
-    #Not using with blogs blog.completed = True
-    db.session.add(blog)
-    db.session.commit()
+        if blog_title == "":
+            title_error="Please enter a title."
+        
+        if blog_body == "":
+            body_error="Please enter a blog body."
+        
+        if not(title_error or body_error):
+            new_blog = Blog(blog_title, blog_body)
+            db.session.add(new_blog)
+            db.session.commit()
 
-    return redirect('/')
+
+    blogs = Blog.query.all()
+
+    if (title_error or body_error):
+        return render_template('newpost.html', title='Add a New Blog Entry', title_error=title_error, body_error=body_error)
+    else:
+        return render_template('blog.html', title="Build a Blog", blogs=blogs)
 
 
 if __name__ == '__main__':

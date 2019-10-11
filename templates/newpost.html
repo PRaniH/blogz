@@ -4,20 +4,22 @@
 # For the moment, when a user submits a new post, redirect them to the main blog page.-->
 
 {% block content %}
-
-    <h1>Add a New Blog Entry</h1>
-    <form method='post'>
+    <form action = "/" method='POST'>
         <label>
             Title for your new blog:
             <p>
             <input type="text" name="blog_title" />
+            <span class="error">{{title_error}}</span>
         </label>
         <p>
         <label>
             Your new blog:
             <p>
             <textarea name="blog_body"></textarea> <!--Modify to make bigger in size-->
+            <span class="error">{{body_error}}</span>
         </label>
         <p>
         <input type="submit" value='Add Entry' />
     </form>
+
+{% endblock %}
