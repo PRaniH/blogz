@@ -13,7 +13,7 @@ parameter corresponding to its id?-->
 
 
         {% for blog in blogs %}
-            <form method="POST" action="/blogpost">
+            <form method="GET" action="/blog">
             <a href='/blog?id={{blog.id}}'>
             <h2>{{blog.title}}</h2></a>
             </form>

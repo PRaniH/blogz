@@ -43,7 +43,7 @@ db = SQLAlchemy(app)
 #Use Case 2: After adding a new blog post, instead of going back to the main page, we go to that blog post's 
 # individual entry page.
 #For both use cases we need to create the template for the page that will display an individual blog, so start 
-# by making that. All it need do is display a blog title and blog body. 
+# by making that. All it needs do is display a blog title and blog body. 
 
 
 
@@ -57,25 +57,6 @@ class Blog(db.Model):
     def __init__(self, title, body):
         self.title = title
         self.body = body
-
-
-@app.route('/newpost', methods=['POST', 'GET'])
-def new_post():
-
-    #blog_id = int(request.form['blog-id'])
-    #blog = Blog.query.get(blog_id)
-    #Not using with blogs blog.completed = True
-    
-    if request.method == 'POST':
-
-        blog_title = request.form['blog_title']
-        blog_body = request.form['blog_body']
-        new_blog = Blog(blog_title, blog_body)
-
-        db.session.add(new_blog)
-        db.session.commit()
-
-    return render_template('newpost.html', title='Add a New Blog Entry') #redirect('/')
 
 
 """One of the first and easiest changes is to make the header 
@@ -104,19 +85,7 @@ the url) from the database and into the render_template function call?"""
 
 @app.route('/blog', methods=['POST', 'GET'])
 def index():
-
-    blogs = Blog.query.all()
-
-    blogid = request.args.get(id) #how can this be passed in?
-
-    if blogid == "":
-        return render_template('blog.html', title="Build a Blog", blogs=blogs)
-    else:
-        return render_template('blog.html', title="Build a Blog", blogs=blogs)
-
-#Could the below be combined with /blog route?
-@app.route('/', methods=['POST', 'GET'])
-def blog():
+    #seems like below should be in /newpost?
     title_error=""
     body_error=""
 
@@ -135,16 +104,78 @@ def blog():
             db.session.add(new_blog)
             db.session.commit()
 
-            blogid = request.args.get['blog.id'] #This didn't cause a crash so far so will leave
-
-   
-
-    blogs = Blog.query.all()
+            #blogid = request.args.get['blog.id'] #This causes an error
 
     if (title_error or body_error):
         return render_template('newpost.html', title='Add a New Blog Entry', title_error=title_error, body_error=body_error)
     else:
+        blogs = Blog.query.all() #This is where it should redirect to show only the one blog post just submitted
         return render_template('blog.html', title="Build a Blog", blogs=blogs)
+
+
+    blogid = request.args.get(id) #This will have a value at the end of the for loop
+
+    if blogid == "":
+        #this part of the if is not executing ever, even when selecting a specific id = 
+        return render_template('blog.html', title="Build a Blog", blogs=blogs)
+    else:
+        #Only grab the one blog?
+        blogs = Blog.query.all()
+        return render_template('blog.html', title="Build a Blog", blogs=blogs)
+
+#Could the below be combined with /blog route?
+@app.route('/', methods=['POST', 'GET'])
+def blog():
+    blogs = Blog.query.all()
+    return render_template('blog.html', title="Build a Blog", blogs=blogs)
+
+""" title_error=""
+    body_error=""
+
+    if request.method == 'POST':
+        blog_title = request.form['blog_title']
+        blog_body = request.form['blog_body']
+
+        if blog_title == "":
+            title_error="Please enter a title."
+        
+        if blog_body == "":
+            body_error="Please enter a blog body."
+        
+        if not(title_error or body_error):
+            new_blog = Blog(blog_title, blog_body)
+            db.session.add(new_blog)
+            db.session.commit()
+
+           
+
+   
+
+    if (title_error or body_error):
+        return render_template('newpost.html', title='Add a New Blog Entry', title_error=title_error, body_error=body_error)
+    else:
+        blogs = Blog.query.all()"""
+    
+
+@app.route('/newpost', methods=['POST', 'GET'])
+def new_post():
+
+    #blog_id = int(request.form['blog-id'])
+    #blog = Blog.query.get(blog_id)
+    #Not using with blogs blog.completed = True
+    
+    if request.method == 'POST':
+
+        blog_title = request.form['blog_title']
+        blog_body = request.form['blog_body']
+        new_blog = Blog(blog_title, blog_body)
+
+        db.session.add(new_blog)
+        db.session.commit()
+
+    return render_template('newpost.html', title='Add a New Blog Entry') #redirect('/')
+
+
 
 
 #def displaypost
