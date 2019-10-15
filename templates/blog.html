@@ -1,10 +1,24 @@
 {% extends "base.html" %}
 
 {% block content %}
-    
+
+<!--One of the first and easiest changes is to make the header 
+for the blog title on the home page be a link. But what url do 
+we want it to link to? Well, this is the format that we want the 
+url of a single blog entry to have: ./blog?id=6 (Here 6 is just 
+one example of an id number for a blog post.) So using jinja2 
+templating syntax, how can you make sure that each blog entry 
+that is generated on the main page has an href with a query
+parameter corresponding to its id?-->
+
+
         {% for blog in blogs %}
-            <h2>{{blog.title}}</h2>
+            <form method="POST" action="/blogpost">
+            <a href='/blog?id={{blog.id}}'>
+            <h2>{{blog.title}}</h2></a>
+            </form>
             {{blog.body}}
+            {{blog.id}} <!--For testing, remove later-->
             <hr>
         {% endfor %}
 

@@ -78,20 +78,47 @@ def new_post():
     return render_template('newpost.html', title='Add a New Blog Entry') #redirect('/')
 
 
+"""One of the first and easiest changes is to make the header 
+for the blog title on the home page be a link. But what url do 
+we want it to link to? Well, this is the format that we want the 
+url of a single blog entry to have: ./blog?id=6 (Here 6 is just 
+one example of an id number for a blog post.) So using jinja2 
+templating syntax, how can you make sure that each blog entry 
+that is generated on the main page has an href with a query
+parameter corresponding to its id?
+
+The next thing we need to determine is how we are going to handle
+an additional GET request on our homepage since we are already
+handling a GET request there. Of course, the difference is that
+in this use case it's a GET request with query parameters. So
+we'll want to handle the GET requests differently, returning 
+a different template, depending on the contents (or lack 
+thereof) of the dictionary request.args.
+
+Finally, we need to think about how the template is going to know 
+which blog's data to display. The blog object will be passed into 
+the template via render_template. What are the steps we need to take 
+to get the right blog object (the one that has the id we'll get from 
+the url) from the database and into the render_template function call?"""
+
+
 @app.route('/blog', methods=['POST', 'GET'])
 def index():
 
-    blogs = Blog.query.all() 
-    
-    return render_template('blog.html', title="Build a Blog", blogs=blogs)
+    blogs = Blog.query.all()
+
+    blogid = request.args.get(id) #how can this be passed in?
+
+    if blogid == "":
+        return render_template('blog.html', title="Build a Blog", blogs=blogs)
+    else:
+        return render_template('blog.html', title="Build a Blog", blogs=blogs)
 
 #Could the below be combined with /blog route?
 @app.route('/', methods=['POST', 'GET'])
 def blog():
     title_error=""
     body_error=""
-
-    #blogs = Blog.query.all()
 
     if request.method == 'POST':
         blog_title = request.form['blog_title']
@@ -107,6 +134,10 @@ def blog():
             new_blog = Blog(blog_title, blog_body)
             db.session.add(new_blog)
             db.session.commit()
+
+            blogid = request.args.get['blog.id'] #This didn't cause a crash so far so will leave
+
+   
 
     blogs = Blog.query.all()
 
