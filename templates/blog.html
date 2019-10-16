@@ -11,6 +11,12 @@ templating syntax, how can you make sure that each blog entry
 that is generated on the main page has an href with a query
 parameter corresponding to its id?-->
 
+{% if blogs|length == 1 %} <!--There may be a better way to do this when there is only one blog in the DB-->
+    <h1><center>{{blogs[0].title}}</h1></center>
+    {{blogs[0].body}}
+
+{% else %}
+        <h1><center>{{title}}</center></h1>
         {% for blog in blogs %}
             <form method="POST" action="/blog">
                 <input type="hidden" name="blog-id" id = "blog-id" value="{{blog.id}}">
@@ -19,9 +25,8 @@ parameter corresponding to its id?-->
                 </input>
             </form>
             {{blog.body}}
-            {{blog.id}} <!--For testing, remove later-->
             <hr>
         {% endfor %}
-
+{% endif %}
 
 {% endblock %}

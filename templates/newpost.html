@@ -2,7 +2,9 @@
 
 {% block content %}
 <!--When a user submits a new post, redirect them to the main blog page.-->
-    <form action = "/newpost" method='POST'> <!--/ path has error validation-->
+    <h1><center>{{title}}</center></h1>
+
+    <form action = "/newpost" method='POST'> <!--/ Path has error validation-->
         <label>
             Title for your new blog:
             <p>
@@ -13,7 +15,7 @@
         <label>
             Your new blog:
             <p>
-            <textarea rows = "10" cols = "50" name="blog_body"></textarea> <!--Modify to make bigger in size-->
+            <textarea rows = "10" cols = "50" name="blog_body"></textarea>
             <span class="error">{{body_error}}</span>
         </label>
         <p>
