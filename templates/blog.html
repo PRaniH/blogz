@@ -11,15 +11,17 @@ templating syntax, how can you make sure that each blog entry
 that is generated on the main page has an href with a query
 parameter corresponding to its id?-->
 
-
         {% for blog in blogs %}
-            <form method="GET" action="/blog">
-            <a href='/blog?id={{blog.id}}'>
-            <h2>{{blog.title}}</h2></a>
+            <form method="POST" action="/blog">
+                <input type="hidden" name="blog-id" id = "blog-id" value="{{blog.id}}">
+                <a href='/blog?id={{blog.id}}'>
+                <h2>{{blog.title}}</h2></a>
+                </input>
             </form>
             {{blog.body}}
             {{blog.id}} <!--For testing, remove later-->
             <hr>
         {% endfor %}
+
 
 {% endblock %}

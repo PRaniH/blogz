@@ -82,46 +82,7 @@ the template via render_template. What are the steps we need to take
 to get the right blog object (the one that has the id we'll get from 
 the url) from the database and into the render_template function call?"""
 
-
-@app.route('/blog', methods=['POST', 'GET'])
-def index():
-    #seems like below should be in /newpost?
-    title_error=""
-    body_error=""
-
-    if request.method == 'POST':
-        blog_title = request.form['blog_title']
-        blog_body = request.form['blog_body']
-
-        if blog_title == "":
-            title_error="Please enter a title."
-        
-        if blog_body == "":
-            body_error="Please enter a blog body."
-        
-        if not(title_error or body_error):
-            new_blog = Blog(blog_title, blog_body)
-            db.session.add(new_blog)
-            db.session.commit()
-
-            #blogid = request.args.get['blog.id'] #This causes an error
-
-    if (title_error or body_error):
-        return render_template('newpost.html', title='Add a New Blog Entry', title_error=title_error, body_error=body_error)
-    else:
-        blogs = Blog.query.all() #This is where it should redirect to show only the one blog post just submitted
-        return render_template('blog.html', title="Build a Blog", blogs=blogs)
-
-
-    blogid = request.args.get(id) #This will have a value at the end of the for loop
-
-    if blogid == "":
-        #this part of the if is not executing ever, even when selecting a specific id = 
-        return render_template('blog.html', title="Build a Blog", blogs=blogs)
-    else:
-        #Only grab the one blog?
-        blogs = Blog.query.all()
-        return render_template('blog.html', title="Build a Blog", blogs=blogs)
+#blog_id = 100000
 
 #Could the below be combined with /blog route?
 @app.route('/', methods=['POST', 'GET'])
@@ -129,10 +90,52 @@ def blog():
     blogs = Blog.query.all()
     return render_template('blog.html', title="Build a Blog", blogs=blogs)
 
-""" title_error=""
+bid = ""
+
+@app.route('/blog', methods=['POST', 'GET'])
+def index():
+    #blogid = int(request.form.get(['blog-id'], False)) #This will have a value at the end of the for loop
+   # blogs = Blog.query.filter_by(id=12).all()
+   # return render_template('blog.html', blogs=blogs
+    
+    #If there is a blog-id, do filter by else do all.
+    #blogs = Blog.query.filter_by(id=12).all() #This works! Just need to figure out how to pass in the correct ID
+    
+    #Supposed to use dictionary request.args here and see if returns something
+
+    bid = request.args.get('id') #This is OK
+
+    if bid is None:
+        blogs = Blog.query.all()
+        return render_template('blog.html', title="Build a Blog", blogs=blogs) #redirect("/blog?id=" + str(12)) Might have to change to redireect to blog?id=
+    else:
+        blogs = Blog.query.filter_by(id=bid).all() #This is working
+        return render_template('blog.html', blogs=blogs) #redirect("/blog?id=" + str(12)) Might have to change to redireect to blog?id=
+
+    #blogid = int(request.form['blog-id']) #This will have a value at the end of the for loop
+
+    """
+    Is the below even needed or correct?
+    if blogid == "":
+        #thi['blog_id']s part of the if is not executing ever, even when selecting a specific id = 
+        blogs = Blog.query.filter_by(id=blogid).all() #blogs = Blog.query.get(12)
+        return render_template('blog.html', title="Build a Blog", blogs=blogs)
+    else:
+        #Only grab the one blog?
+        blogs = Blog.query.all()
+        #blogs = Blog.query.get()
+        return render_template('blog.html', title="Build a Blog", blogs=blogs)"""
+
+
+
+
+@app.route('/newpost', methods=['POST', 'GET'])
+def new_post():
+    title_error=""
     body_error=""
 
     if request.method == 'POST':
+
         blog_title = request.form['blog_title']
         blog_body = request.form['blog_body']
 
@@ -146,38 +149,21 @@ def blog():
             new_blog = Blog(blog_title, blog_body)
             db.session.add(new_blog)
             db.session.commit()
+            blogs = Blog.query.filter_by(title=blog_title).all()
 
-           
-
-   
+            #blogid = request.args.get['blog.id'] #This causes an error
+    else:   
+        return render_template('newpost.html', title='Add a New Blog Entry')
 
     if (title_error or body_error):
         return render_template('newpost.html', title='Add a New Blog Entry', title_error=title_error, body_error=body_error)
     else:
-        blogs = Blog.query.all()"""
-    
-
-@app.route('/newpost', methods=['POST', 'GET'])
-def new_post():
-
-    #blog_id = int(request.form['blog-id'])
-    #blog = Blog.query.get(blog_id)
-    #Not using with blogs blog.completed = True
-    
-    if request.method == 'POST':
-
-        blog_title = request.form['blog_title']
-        blog_body = request.form['blog_body']
-        new_blog = Blog(blog_title, blog_body)
-
-        db.session.add(new_blog)
-        db.session.commit()
-
-    return render_template('newpost.html', title='Add a New Blog Entry') #redirect('/')
+        #blogs = Blog.query.all() #This is where it should show only the one blog post just submitted
+        return redirect('/blog?id={0}'.format(blogs))
+        #return render_template('blog.html', title="Build a Blog", blogs=blogs)
 
 
-
-
+#THIS FUNCTION IS LIKELY UNNECESSARY
 #def displaypost
 #need to ultimately pass in something like http://localhost:5000/hello?first_name=Chris
 #like  return redirect("/welcome?username=" + username)
@@ -196,6 +182,7 @@ def displaypost(): #maybe have to get new_blog passed in from new post function?
 
     return redirect("/blogpost?id=" + blogid) #something is off here with how to display the page without .html
 
+#THIS FUNCTION IS LIKELY UNNECESSARY
 @app.route("/blogpost")
 def welcome():
     
@@ -212,9 +199,6 @@ def welcome():
     return render_template('blogpost.html', title=blogtitle, body=blogbody)
 
     
-
-
-
 
 
 if __name__ == '__main__':
