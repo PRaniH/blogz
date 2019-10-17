@@ -101,10 +101,6 @@ def login():
             flash("Logged in")
             return redirect('/newpost') #('/')
             
-
-#TO DO User enters a username that is stored in the database with an incorrect password and is redirected to the /login page with a message that their password is incorrect.
-#TO DO User tries to login with a username that is not stored in the database and is redirected to the /login page with a message that this username does not exist.
-#TO DO User does not have an account and clicks "Create Account" and is directed to the /signup page.
     return render_template('login.html')
 
 
@@ -121,7 +117,7 @@ def signup():
         password = request.form['password']
         verify = request.form['verify']
 
-        # TODO - validate user's data
+        # Validate user's data
 
         if username == "":
             username_error = "Invalid username (left blank)"
@@ -147,15 +143,12 @@ def signup():
             if existing_user:
                 username_error = "Username already exists."
             else:
-#        if not existing_user:
                 new_user = User(username, password)
                 db.session.add(new_user)
                 db.session.commit()
                 session['username'] = username
                 return redirect('/newpost') #('/') 
-#        else:
-            # TODO - user better response messaging
-#            return "<h1>Duplicate user</h1>"
+
 
         if (username_error or password_error or verify_error):
             return render_template('signup.html', username_error=username_error, password_error=password_error, verify_error=verify_error) #could improve this
@@ -213,10 +206,19 @@ def index(): #This was previously called blog()
 @app.route('/blog', methods=['POST', 'GET'])
 def list_blogs(): #Renamed this from what it was in Build a Blog (was index)
     bid = request.args.get('id')
+    buser = request.args.get('user')
+
+#if user is passed in, get all blogs for that user
+#if blog ID is passed in, just get that one specific blog, if no blog id
+
 
     if bid is None:
-        blogs = Blog.query.all()
-        return render_template('blog.html', title="Build a Blog", blogs=blogs)
+        if buser is None:
+            blogs = Blog.query.all()
+            return render_template('blog.html', title="Build a Blog", blogs=blogs)
+        else:
+            blogs = Blog.query.filter_by(owner_id=buser).all()
+            return render_template('blog.html', title="Build a Blog", blogs=blogs)
     else:
         blogs = Blog.query.filter_by(id=bid).all()
         return render_template('blog.html', blogs=blogs)

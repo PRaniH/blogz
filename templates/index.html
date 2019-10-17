@@ -2,22 +2,16 @@
 
 {% block content %}
 
-{% if users|length == 1 %} <!--There may be a better way to do this when there is only one blog in the DB-->
-    <!--h1><center>{{blogs[0].title}}</h1></center>
-    {{blogs[0].body}}
-    <i>written by </i> {{blogs[0].owner_id}} <!--Need to update this to be the user ID from the database - how to cross reference?-->
-    {{ users[0].username }}
-{% else %}
         <h1><center>{{title}}</center></h1>
         {% for user in users %}
             <form method="POST" action="/blog">
                 <input type="hidden" name="user-id" id = "user-id" value="{{user.id}}">
-                <a href='/user?id={{user.id}}'>
+                <a href='/blog?user={{user.id}}'>
                 <h2>{{user.username}}</h2></a>
                 </input>
             </form>
             <hr>
         {% endfor %}
-{% endif %}
+
 
 {% endblock %}
