@@ -78,7 +78,6 @@ class User(db.Model):
         self.username = username
         self.password = password
 
-#Copied below from sample code
 @app.before_request
 def require_login():
     allowed_routes = ['login', 'list_blogs', 'signup', 'index']
@@ -90,13 +89,18 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+
         user = User.query.filter_by(username=username).first()
-        if user and user.password == password:
+
+        if not user:
+            flash('User does not exist', 'error')
+        elif user.password != password:
+            flash('User password incorrect', 'error')
+        else:
             session['username'] = username
             flash("Logged in")
             return redirect('/newpost') #('/')
-        else:
-            flash('User password incorrect, or user does not exist', 'error')
+            
 
 #TO DO User enters a username that is stored in the database with an incorrect password and is redirected to the /login page with a message that their password is incorrect.
 #TO DO User tries to login with a username that is not stored in the database and is redirected to the /login page with a message that this username does not exist.
@@ -107,6 +111,11 @@ def login():
 #TO DO Note several reqs. for the below, review later
 @app.route('/signup', methods=['POST', 'GET'])
 def signup():
+
+    username_error = ""
+    password_error = ""
+    verify_error = ""
+
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -114,24 +123,52 @@ def signup():
 
         # TODO - validate user's data
 
-        existing_user = User.query.filter_by(username=username).first()
-        if not existing_user:
-            new_user = User(username, password)
-            db.session.add(new_user)
-            db.session.commit()
-            session['username'] = username
-            return redirect('/newpost') #('/') 
-        else:
-            # TODO - user better response messaging
-            return "<h1>Duplicate user</h1>"
+        if username == "":
+            username_error = "Invalid username (left blank)"
+        elif len(username) < 3:
+            username_error = "Username must be at least 3 characters long."
+        
+        if password == "":
+            password_error = "Invalid password (left blank)"
+        elif len(password) < 3:
+            password_error = "Password must be at least 3 characters long."
 
-    return render_template('signup.html')
+        if verify == "":
+            verify_error = "Invalid re-entered password (left blank)."
+        elif password != verify:
+            password_error = "Passwords must match."
+            verify_error = password_error
+
+        if (username_error or password_error or verify_error):
+            return render_template('signup.html', username_error=username_error, password_error=password_error, verify_error=verify_error)
+        else:
+            existing_user = User.query.filter_by(username=username).first()
+
+            if existing_user:
+                username_error = "Username already exists."
+            else:
+#        if not existing_user:
+                new_user = User(username, password)
+                db.session.add(new_user)
+                db.session.commit()
+                session['username'] = username
+                return redirect('/newpost') #('/') 
+#        else:
+            # TODO - user better response messaging
+#            return "<h1>Duplicate user</h1>"
+
+        if (username_error or password_error or verify_error):
+            return render_template('signup.html', username_error=username_error, password_error=password_error, verify_error=verify_error) #could improve this
+        else:
+            return render_template('signup.html') #Might need to add error encoded error etc.
+
+    return render_template('signup.html') #Might need to add error encoded error etc.
 
 
 @app.route('/logout')
 def logout():
     del session['username']
-    return redirect('/')
+    return redirect('/blog')
 
 """One of the first and easiest changes is to make the header 
 for the blog title on the home page be a link. But what url do 
