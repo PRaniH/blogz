@@ -1,10 +1,10 @@
-from flask import Flask, request, redirect, render_template
+from flask import Flask, request, redirect, render_template, session, flash
 from flask_sqlalchemy import SQLAlchemy
 import cgi, re
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://build-a-blog:MyNewPass@localhost:3306/build-a-blog' 
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:MyNewPass@localhost:3306/build-a-blog' 
 app.config['SQLALCHEMY_ECHO'] = True
 
 db = SQLAlchemy(app)
@@ -27,8 +27,6 @@ db = SQLAlchemy(app)
 
 #If either the blog title or blog body is left empty in the new post form, the form is rendered again, with a helpful
 #error message and any previously-entered content in the same form inputs.
-
-#TO DO Check get and post to see if it's correct
 
 #Let's add the ability to view each blog all by itself on a webpage. Instead of creating multiple HTML files, 
 #one for each new blog post we create, we can use a single template to display a given blog's title and body.
@@ -53,10 +51,82 @@ class Blog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120))
     body = db.Column(db.String(5000))
-
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    
     def __init__(self, title, body):
         self.title = title
         self.body = body
+        self.owner = owner #Doesn't need to say owner_id?
+
+""" User class and associated table to our app. It should have the following properties:
+
+id which is an Integer primary key that auto-increments (just like the others you've created in class)
+username which will be a String with a size of your choosing
+password which will also be a String with a size of your choosing
+blogs which signifies a relationship between the blog table and this user, thus binding this user with the blog posts they write."""
+
+class User(db.Model):
+    
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50))
+    passowrd = db.Column(db.String(50)) #Normally should not store in DB but per assignment is OK to do here
+    blogs = db.relationship('Blog', backref='owner') 
+
+    def __init__(self, username, password): #Need to add blogs in here?
+        self.username = username
+        self.password = password
+
+#Copied below from sample code
+
+
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = User.query.filter_by(username=username).first()
+        if user and user.password == password:
+            session['username'] = username
+            flash("Logged in")
+            return redirect('/newpost') #('/')
+        else:
+            flash('User password incorrect, or user does not exist', 'error')
+
+#TO DO User enters a username that is stored in the database with an incorrect password and is redirected to the /login page with a message that their password is incorrect.
+#TO DO User tries to login with a username that is not stored in the database and is redirected to the /login page with a message that this username does not exist.
+#TO DO User does not have an account and clicks "Create Account" and is directed to the /signup page.
+    return render_template('login.html')
+
+#Do we need the below?
+@app.before_request
+def require_login():
+    allowed_routes = ['login', 'signup']
+    if request.endpoint not in allowed_routes and 'username' not in session:
+        return redirect('/login')
+
+
+#TO DO Note several reqs. for the below, review later
+@app.route('/signup', methods=['POST', 'GET'])
+def signup():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        verify = request.form['verify']
+
+        # TODO - validate user's data
+
+        existing_user = User.query.filter_by(username=username).first()
+        if not existing_user:
+            new_user = User(username, password)
+            db.session.add(new_user)
+            db.session.commit()
+            session['username'] = username
+            return redirect('/newpost') #('/') 
+        else:
+            # TODO - user better response messaging
+            return "<h1>Duplicate user</h1>"
+
+    return render_template('signup.html')
 
 
 """One of the first and easiest changes is to make the header 
