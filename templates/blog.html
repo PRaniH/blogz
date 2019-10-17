@@ -2,24 +2,14 @@
 
 {% block content %}
 
-<!--One of the first and easiest changes is to make the header 
-for the blog title on the home page be a link. But what url do 
-we want it to link to? Well, this is the format that we want the 
-url of a single blog entry to have: ./blog?id=6 (Here 6 is just 
-one example of an id number for a blog post.) So using jinja2 
-templating syntax, how can you make sure that each blog entry 
-that is generated on the main page has an href with a query
-parameter corresponding to its id?-->
-
-{% if blogs|length == 1 %} <!--Change to check if there is a userThere may be a better way to do this when there is only one blog in the DB-->
+{% if blogs|length == 1 %} 
     <h1><center>{{blogs[0].title}}</h1></center>
     {{blogs[0].body}}
     <p>
     <i>written by </i> 
      <a href='/blog?user={{blogs[0].owner.id}}'>
                 {{blogs[0].owner.username}} </a>
-    <!--Need to update this to be the user ID from the database - how to cross reference? { {blogs[0].owner.username } }  -->
-
+   
 {% else %}
         <h1><center>{{title}}</center></h1>
         {% for blog in blogs %}

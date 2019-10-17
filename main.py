@@ -11,43 +11,41 @@ db = SQLAlchemy(app)
 
 app.secret_key = 'y234kGL569'
 
-#ASSIGNMENT...displays blog posts on a main page and allows users to add new blog posts on a form page. After submitting a 
-#new blog entry on the form page, the user is redirected to a page that displays only that blog (rather than 
-#returning to the form page or to the main page). Each blog post has a title and a body. 
-
-#Make sure you can say the following about your app:
-
-#The /blog route displays all the blog posts.
-
-#You're able to submit a new post at the /newpost route. After submitting a new post, your app displays the 
-#main blog page.
-
-#You have two templates, one each for the /blog (main blog listings) and /newpost (post new blog entry) views.
-#Your templates should extend a base.html template which includes some boilerplate HTML that will be used on each page.
-
-#In your base.html template, you have some navigation links that link to the main blog page and to the add new blog page.
-
-#If either the blog title or blog body is left empty in the new post form, the form is rendered again, with a helpful
-#error message and any previously-entered content in the same form inputs.
-
-#Let's add the ability to view each blog all by itself on a webpage. Instead of creating multiple HTML files, 
-#one for each new blog post we create, we can use a single template to display a given blog's title and body.
-#We'll designate which blog's data we want displayed by using a query param containing the id for that blog in the url. 
-#Then the request handler can dynamically grab the blog that corresponds to that id from the database and pass it to 
-#the template to generate the desired page.
-
-#There are two use cases for this functionality:
-
 #Use Case 1: We click on a blog entry's title on the main page and go to a blog's individual entry page.
 
 #Use Case 2: After adding a new blog post, instead of going back to the main page, we go to that blog post's 
 #individual entry page.
-#For both use cases we need to create the template for the page that will display an individual blog, so start 
-#by making that. All it needs do is display a blog title and blog body. 
+
+"""More use cases
+User enters a username that is stored in the database with the correct password and is redirected to the /newpost page with their username being stored in a session.
+User enters a username that is stored in the database with an incorrect password and is redirected to the /login page with a message that their password is incorrect.
+User tries to login with a username that is not stored in the database and is redirected to the /login page with a message that this username does not exist.
+
+For /login page:
+
+User enters a username that is stored in the database with the correct password and is redirected to the /newpost page with their username being stored in a session.
+User enters a username that is stored in the database with an incorrect password and is redirected to the /login page with a message that their password is incorrect.
+User tries to login with a username that is not stored in the database and is redirected to the /login page with a message that this username does not exist.
+User does not have an account and clicks "Create Account" and is directed to the /signup page.
+For /signup page:
+
+User enters new, valid username, a valid password, and verifies password correctly and is redirected to the '/newpost' page with their username being stored in a session.
+User leaves any of the username, password, or verify fields blank and gets an error message that one or more fields are invalid.
+User enters a username that already exists and gets an error message that username already exists.
+User enters different strings into the password and verify fields and gets an error message that the passwords do not match.
+User enters a password or username less than 3 characters long and gets either an invalid username or an invalid password message.
+
+User is logged in and adds a new blog post, then is redirected to a page featuring the individual blog entry they just created (as in Build-a-Blog).
+User visits the /blog page and sees a list of all blog entries by all users.
+User clicks on the title of a blog entry on the /blog page and lands on the individual blog entry page.
+User clicks "Logout" and is redirected to the /blog page and is unable to access the /newpost page (is redirected to /login page instead).
+
+User is on the / page ("Home" page) and clicks on an author's username in the list and lands on the individual blog user's page.
+User is on the /blog page and clicks on the author's username in the tagline and lands on the individual blog user's page.
+User is on the individual entry page (e.g., /blog?id=1) and clicks on the author's username in the tagline and lands on the individual blog user's page.
+"""
 
 
-
-# Blog class with the necessary properties (i.e., an id, title, and body)
 class Blog(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
@@ -58,14 +56,8 @@ class Blog(db.Model):
     def __init__(self, title, body, owner):
         self.title = title
         self.body = body
-        self.owner = owner #Doesn't need to say owner_id?
+        self.owner = owner
 
-""" User class and associated table to our app. It should have the following properties:
-
-id which is an Integer primary key that auto-increments (just like the others you've created in class)
-username which will be a String with a size of your choosing
-password which will also be a String with a size of your choosing
-blogs which signifies a relationship between the blog table and this user, thus binding this user with the blog posts they write."""
 
 class User(db.Model):
     
@@ -74,15 +66,17 @@ class User(db.Model):
     password = db.Column(db.String(50)) #Normally should not store in DB but per assignment is OK to do here
     blogs = db.relationship('Blog', backref='owner') 
 
-    def __init__(self, username, password): #Need to add blogs in here?
+    def __init__(self, username, password):
         self.username = username
         self.password = password
+
 
 @app.before_request
 def require_login():
     allowed_routes = ['login', 'list_blogs', 'signup', 'index']
     if request.endpoint not in allowed_routes and 'username' not in session:
         return redirect('/login')
+
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
@@ -104,7 +98,6 @@ def login():
     return render_template('login.html')
 
 
-#TO DO Note several reqs. for the below, review later
 @app.route('/signup', methods=['POST', 'GET'])
 def signup():
 
@@ -117,8 +110,7 @@ def signup():
         password = request.form['password']
         verify = request.form['verify']
 
-        # Validate user's data
-
+        # Validate user's entries
         if username == "":
             username_error = "Invalid username (left blank)"
         elif len(username) < 3:
@@ -147,7 +139,7 @@ def signup():
                 db.session.add(new_user)
                 db.session.commit()
                 session['username'] = username
-                return redirect('/newpost') #('/') 
+                return redirect('/newpost') 
 
 
         if (username_error or password_error or verify_error):
@@ -163,53 +155,17 @@ def logout():
     del session['username']
     return redirect('/blog')
 
-"""tO DO While we're adding navigation links, let's also add a link to
- "/login" and to "/", which will take users to the page we'll build in
-  index.html that will display a list of all the usernames. You can call
-   that page "Home"."""
 
-"""One of the first and easiest changes is to make the header 
-for the blog title on the home page be a link. But what url do 
-we want it to link to? Well, this is the format that we want the 
-url of a single blog entry to have: ./blog?id=6 (Here 6 is just 
-one example of an id number for a blog post.) So using jinja2 
-templating syntax, how can you make sure that each blog entry 
-that is generated on the main page has an href with a query
-parameter corresponding to its id?
-
-The next thing we need to determine is how we are going to handle
-an additional GET request on our homepage since we are already
-handling a GET request there. Of course, the difference is that
-in this use case it's a GET request with query parameters. So
-we'll want to handle the GET requests differently, returning 
-a different template, depending on the contents (or lack 
-thereof) of the dictionary request.args.
-
-Finally, we need to think about how the template is going to know 
-which blog's data to display. The blog object will be passed into 
-the template via render_template. What are the steps we need to take 
-to get the right blog object (the one that has the id we'll get from 
-the url) from the database and into the render_template function call?"""
-
-
-@app.route('/', methods=['POST', 'GET']) #THis used to reference what is now def index()
-def home():
+@app.route('/', methods=['POST', 'GET'])
+def index():
     users = User.query.all()
-    return render_template('index.html', title="Build a Blog User List", users=users) #Need to update this to list only the users
-
-@app.route('/index')
-def index(): #This was previously called blog()
-    blogs = Blog.query.all()
-    return render_template('blog.html', title="Build a Blog", blogs=blogs)
+    return render_template('index.html', title="Build a Blog User List", users=users)
 
 
 @app.route('/blog', methods=['POST', 'GET'])
-def list_blogs(): #Renamed this from what it was in Build a Blog (was index)
+def list_blogs():
     bid = request.args.get('id')
     buser = request.args.get('user')
-
-#if user is passed in, get all blogs for that user
-#if blog ID is passed in, just get that one specific blog, if no blog id
 
 
     if bid is None:
@@ -223,15 +179,6 @@ def list_blogs(): #Renamed this from what it was in Build a Blog (was index)
         blogs = Blog.query.filter_by(id=bid).all()
         return render_template('blog.html', blogs=blogs)
 
-
-#You've got to create a new database record for the blog entry that has just been submitted, but
-#before redirecting, you need to grab the id for the record you just created. That way you'll 
-#know what url (i.e., what number to put on the right side of ?id=) to redirect the user to after 
-#they submit their new entry.
-#When you create a new blog post object, it doesn't immediately have an id that is not None. 
-#However, after running db.session.commit(), SQLAlchemy will populate the id property of the 
-#object to be the value auto-generated by the database upon insert. In other words, after you 
-#commit, you can get the id by using the id property of the object you just saved.
 
 @app.route('/newpost', methods=['POST', 'GET'])
 def new_post():
@@ -267,7 +214,6 @@ def new_post():
 
     else:
         return redirect('/blog?id={0}'.format(bid) )
-
 
 
 if __name__ == '__main__':
