@@ -4,10 +4,12 @@ import cgi, re
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:MyNewPass@localhost:3306/build-a-blog' 
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:MyNewPass@localhost:3306/blogz' 
 app.config['SQLALCHEMY_ECHO'] = True
 
 db = SQLAlchemy(app)
+
+app.secret_key = 'y234kGL569'
 
 #ASSIGNMENT...displays blog posts on a main page and allows users to add new blog posts on a form page. After submitting a 
 #new blog entry on the form page, the user is redirected to a page that displays only that blog (rather than 
@@ -53,7 +55,7 @@ class Blog(db.Model):
     body = db.Column(db.String(5000))
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     
-    def __init__(self, title, body):
+    def __init__(self, title, body, owner):
         self.title = title
         self.body = body
         self.owner = owner #Doesn't need to say owner_id?
@@ -69,7 +71,7 @@ class User(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50))
-    passowrd = db.Column(db.String(50)) #Normally should not store in DB but per assignment is OK to do here
+    password = db.Column(db.String(50)) #Normally should not store in DB but per assignment is OK to do here
     blogs = db.relationship('Blog', backref='owner') 
 
     def __init__(self, username, password): #Need to add blogs in here?
@@ -77,7 +79,11 @@ class User(db.Model):
         self.password = password
 
 #Copied below from sample code
-
+@app.before_request
+def require_login():
+    allowed_routes = ['login', 'list_blogs', 'signup', 'index']
+    if request.endpoint not in allowed_routes and 'username' not in session:
+        return redirect('/login')
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
@@ -96,13 +102,6 @@ def login():
 #TO DO User tries to login with a username that is not stored in the database and is redirected to the /login page with a message that this username does not exist.
 #TO DO User does not have an account and clicks "Create Account" and is directed to the /signup page.
     return render_template('login.html')
-
-#Do we need the below?
-@app.before_request
-def require_login():
-    allowed_routes = ['login', 'signup']
-    if request.endpoint not in allowed_routes and 'username' not in session:
-        return redirect('/login')
 
 
 #TO DO Note several reqs. for the below, review later
@@ -129,6 +128,11 @@ def signup():
     return render_template('signup.html')
 
 
+@app.route('/logout')
+def logout():
+    del session['username']
+    return redirect('/')
+
 """One of the first and easiest changes is to make the header 
 for the blog title on the home page be a link. But what url do 
 we want it to link to? Well, this is the format that we want the 
@@ -154,13 +158,14 @@ the url) from the database and into the render_template function call?"""
 
 
 @app.route('/', methods=['POST', 'GET'])
-def blog():
+def blog(): #I wonder if I can just rename this to index
+    
     blogs = Blog.query.all()
     return render_template('blog.html', title="Build a Blog", blogs=blogs)
 
 
 @app.route('/blog', methods=['POST', 'GET'])
-def index():
+def list_blogs(): #Renamed this from what it was in Build a Blog (was index)
     bid = request.args.get('id')
 
     if bid is None:
@@ -197,7 +202,10 @@ def new_post():
             body_error="Please enter a blog body."
         
         if not(title_error or body_error):
-            new_blog = Blog(blog_title, blog_body)
+            owner = User.query.filter_by(username=session['username']).first()
+    
+            new_blog = Blog(blog_title, blog_body, owner)
+
             db.session.add(new_blog)
             db.session.commit()
             
