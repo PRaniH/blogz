@@ -13,15 +13,28 @@
     </head>
 <body>
 
+<!--TO DO While we're adding navigation links, let's also add a link to
+ "/login" and to "/", which will take users to the page we'll build in
+  index.html that will display a list of all the usernames. You can call
+   that page "Home".-->
+
+<form method =  "Post" action = "/"> <!--This could be aligned better on the page. Also why not do this as a form element?-->
+    <a href='/'>Home</a>
+</form>
+
+
+<div align = "center"> <!--This could be aligned better on the page. Also why not do this as a form element?-->
+    <a href='/login'>Login</a>
+    <a href='/logout'>Log Out</a>
+</div>
+
+
 <form method="POST" action="/blog" style="display:inline-block;">
-<a href='/blog'>Main Blog Page</a></form>
+<a href='/blog'>All Blogs</a></form>
 
 <form method="POST" action="/newpost" style="display:inline-block;">
 <a href='/newpost'>Add a Blog Entry</a></form>
 
-    <div align = "center"> <!--This could be aligned better on the page. Also why not do this as a form element?-->
-        <a href='/logout'>Log Out</a>
-    </div>
 
     {% with messages = get_flashed_messages(with_categories=True) %}
         <ul>

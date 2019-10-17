@@ -14,6 +14,8 @@ parameter corresponding to its id?-->
 {% if blogs|length == 1 %} <!--There may be a better way to do this when there is only one blog in the DB-->
     <h1><center>{{blogs[0].title}}</h1></center>
     {{blogs[0].body}}
+    <p>
+    <i>written by </i> {{blogs[0].owner_id}} <!--Need to update this to be the user ID from the database - how to cross reference?-->
 
 {% else %}
         <h1><center>{{title}}</center></h1>
@@ -25,6 +27,11 @@ parameter corresponding to its id?-->
                 </input>
             </form>
             {{blog.body}}
+            <p>
+            <i>written by </i> 
+                <!--input type="hidden" name="user-id" id = "user-id" value="{ { user.id } }">
+                <a href='/blog?user={ { user.id } }'-->
+               {{blog.owner_id}} <!--Need to update this to be the user ID from the database - how to cross reference?-->
             <hr>
         {% endfor %}
 {% endif %}

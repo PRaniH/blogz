@@ -170,6 +170,11 @@ def logout():
     del session['username']
     return redirect('/blog')
 
+"""tO DO While we're adding navigation links, let's also add a link to
+ "/login" and to "/", which will take users to the page we'll build in
+  index.html that will display a list of all the usernames. You can call
+   that page "Home"."""
+
 """One of the first and easiest changes is to make the header 
 for the blog title on the home page be a link. But what url do 
 we want it to link to? Well, this is the format that we want the 
@@ -194,9 +199,13 @@ to get the right blog object (the one that has the id we'll get from
 the url) from the database and into the render_template function call?"""
 
 
-@app.route('/', methods=['POST', 'GET'])
-def blog(): #I wonder if I can just rename this to index
-    
+@app.route('/', methods=['POST', 'GET']) #THis used to reference what is now def index()
+def home():
+    users = User.query.all()
+    return render_template('index.html', title="Build a Blog User List", users=users) #Need to update this to list only the users
+
+@app.route('/index')
+def index(): #This was previously called blog()
     blogs = Blog.query.all()
     return render_template('blog.html', title="Build a Blog", blogs=blogs)
 
